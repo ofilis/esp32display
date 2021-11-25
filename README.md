@@ -6,7 +6,7 @@ In my mostly inspired on this thread: https://community.home-assistant.io/t/e-pa
 Have a look at all those great projects.
 
 
-What i used:
+What i have used:
 
 - Waveshare 400x300, 4.2inch E-Ink raw display
 - Waveshare Universal e-Paper Raw Panel Driver HAT
