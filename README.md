@@ -11,5 +11,5 @@ What i have used:
 - Waveshare 400x300, 4.2inch E-Ink raw display
 - Waveshare Universal e-Paper Raw Panel Driver HAT
 - ESP32-WROOM-32 Lua development board
-- 3d Printed Case. (Thanks to creator)
+- 3D Printed Case. (Thanks to creator)
   https://www.thingiverse.com/thing:4772071 
