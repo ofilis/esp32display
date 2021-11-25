@@ -11,6 +11,12 @@ esphome:
   name: esp32display
   platform: ESP32
   board: esp32dev
+  on_boot:
+    priority: -100
+    then:
+      - switch.turn_on: statusLED
+      - delay: 1s
+      - switch.turn_off: statusLED
 
 # Enable logging
 logger:
