@@ -1,24 +1,7 @@
 sensor:
 
-- platform: moon
-  - platform: template
-    sensors:
-      moon_tpl:
-        unique_id: moon_tpl 
-        # https://github.com/Templarian/MaterialDesign-Webfont/tree/v4.4.95
-        value_template: >-
-          {% set map = {
-            "first_quarter": "\U000F0F61",
-            "full_moon": "\U000F0F62",
-            "last_quarter": "\U000F0F63",
-            "new_moon": "\U000F0F64",
-            "waning_crescent": "\U000F0F65",
-            "waning_gibbous": "\U000F0F66",
-            "waxing_crescent": "\U000F0F67",
-            "waxing_gibbous": "\U000F0F68",
-          } %}
-          {{- map[states('sensor.moon')] -}}
-
+  - platform: moon
+  
   - platform: time_date
     display_options:
       - 'date'
