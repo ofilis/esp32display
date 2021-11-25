@@ -1,8 +1,8 @@
 # esp32display
 E-Paper Display Project with ESP32 and Home Assistant
 
-This is the project that i build for display weather conditions and my oficce smart home data.
-In my mostly inspired on this thread: https://community.home-assistant.io/t/e-paper-display/
+This is the project that i build for display weather conditions and my office smart home data.
+In this project, mostly inspired on this thread: https://community.home-assistant.io/t/e-paper-display/
 Have a look at all those great projects.
 
 
