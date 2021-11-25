@@ -9,11 +9,11 @@ sensor:
   - platform: template
     sensors:
       turkishdayname:
-        friendly_name: 'Jour FR'
+        friendly_name: 'Hour TR'
         entity_id: sensor.date
         value_template: >-
-          {% set jours = ["PZTS", "SALI","ÇARŞ","PERŞ","CUMA","CTSİ","PAZR"] %}
-          {{ jours[now().weekday()] }}
+          {% set hours = ["PZTS", "SALI","ÇARŞ","PERŞ","CUMA","CTSİ","PAZR"] %}
+          {{ hours[now().weekday()] }}
           
   - platform: template
     sensors:
@@ -21,7 +21,7 @@ sensor:
         value_template: >-
             {% set wk = now().strftime('%w') | int %}
             {% set dayz = ["Pzts", "Salı","Çarşb","Perşb","Cuma","Ctesi","Pazar"] %}
-            {{dayz[wk + 0]}}
+            {{dayz[wk + 0]}}     
   - platform: template
     sensors:
       day_1_forecast:
