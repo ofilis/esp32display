@@ -1,0 +1,172 @@
+sensor:
+
+- platform: moon
+  - platform: template
+    sensors:
+      moon_tpl:
+        unique_id: moon_tpl 
+        # https://github.com/Templarian/MaterialDesign-Webfont/tree/v4.4.95
+        value_template: >-
+          {% set map = {
+            "first_quarter": "\U000F0F61",
+            "full_moon": "\U000F0F62",
+            "last_quarter": "\U000F0F63",
+            "new_moon": "\U000F0F64",
+            "waning_crescent": "\U000F0F65",
+            "waning_gibbous": "\U000F0F66",
+            "waxing_crescent": "\U000F0F67",
+            "waxing_gibbous": "\U000F0F68",
+          } %}
+          {{- map[states('sensor.moon')] -}}
+
+  - platform: time_date
+    display_options:
+      - 'date'
+
+  - platform: template
+    sensors:
+      turkishdayname:
+        friendly_name: 'Jour FR'
+        entity_id: sensor.date
+        value_template: >-
+          {% set jours = ["PZTS", "SALI","ÇARŞ","PERŞ","CUMA","CTSİ","PAZR"] %}
+          {{ jours[now().weekday()] }}
+          
+  - platform: template
+    sensors:
+      day_1_name:
+        value_template: >-
+            {% set wk = now().strftime('%w') | int %}
+            {% set dayz = ["Pzts", "Salı","Çarşb","Perşb","Cuma","Ctesi","Pazar"] %}
+            {{dayz[wk + 0]}}
+  - platform: template
+    sensors:
+      day_1_forecast:
+        value_template:  "{{ state_attr('weather.openweathermap', 'forecast')[1].condition }}" 
+  - platform: template
+    sensors:
+      day_1_temp:
+        value_template:  "{{ state_attr('weather.openweathermap', 'forecast')[1].temperature }}" 
+  - platform: template
+    sensors:
+      day_1_templow:
+        value_template:  "{{ state_attr('weather.openweathermap', 'forecast')[1].templow }}" 
+  - platform: template
+    sensors:
+      day_1_precipitation:
+        value_template:  "{{ state_attr('weather.openweathermap', 'forecast')[1].precipitation }}" 
+  - platform: template
+    sensors:
+      day_1_wind_speed:
+        value_template:  "{{ state_attr('weather.openweathermap', 'forecast')[1].wind_speed }}" 
+
+
+        
+  - platform: template
+    sensors:
+      day_2_name:
+        value_template: >-
+            {% set wk = now().strftime('%w') | int %}
+            {% set dayz = ["Pzts", "Salı","Çarşb","Perşb","Cuma","Ctesi","Pazar"] %}
+            {{dayz[wk + 1]}}
+  - platform: template
+    sensors:
+      day_2_forecast:
+        value_template:  "{{ state_attr('weather.openweathermap', 'forecast')[2].condition }}" 
+  - platform: template
+    sensors:
+      day_2_temp:
+        value_template:  "{{ state_attr('weather.openweathermap', 'forecast')[2].temperature }}" 
+  - platform: template
+    sensors:
+      day_2_templow:
+        value_template:  "{{ state_attr('weather.openweathermap', 'forecast')[2].templow }}" 
+  - platform: template
+    sensors:
+      day_2_precipitation:
+        value_template:  "{{ state_attr('weather.openweathermap', 'forecast')[2].precipitation }}" 
+  - platform: template
+    sensors:
+      day_2_wind_speed:
+        value_template:  "{{ state_attr('weather.openweathermap', 'forecast')[2].wind_speed }}" 
+
+        
+  - platform: template
+    sensors:
+      day_3_name:
+        value_template: >-
+            {% set wk = now().strftime('%w') | int %}
+            {% set dayz = ["Pzts", "Salı","Çarşb","Perşb","Cuma","Ctesi","Pazar"] %}
+            {{dayz[wk + 2]}}
+  - platform: template
+    sensors:
+      day_3_forecast:
+        value_template:  "{{ state_attr('weather.openweathermap', 'forecast')[3].condition }}" 
+  - platform: template
+    sensors:
+      day_3_temp:
+        value_template:  "{{ state_attr('weather.openweathermap', 'forecast')[3].temperature }}" 
+  - platform: template
+    sensors:
+      day_3_templow:
+        value_template:  "{{ state_attr('weather.openweathermap', 'forecast')[3].templow }}" 
+  - platform: template
+    sensors:
+      day_3_precipitation:
+        value_template:  "{{ state_attr('weather.openweathermap', 'forecast')[3].precipitation }}" 
+  - platform: template
+    sensors:
+      day_3_wind_speed:
+        value_template:  "{{ state_attr('weather.openweathermap', 'forecast')[3].wind_speed }}" 
+          
+  - platform: template
+    sensors:
+      fulldate:
+        friendly_name: 'Full Date'
+        entity_id: sensor.date
+        value_template: >-
+            {% set months = ["OCAK", "ŞUBAT", "MART", "NİSAN", "MAYIS", "HAZİRAN", "TEMMUZ", "AĞUSTOS", "EYLÜL", "EKİM", "KASIM", "ARALIK"] %}
+            {{ now().day | string }} {{ months[now().month-1] }} {{ now().year | string }}
+            
+  - platform: template
+    sensors:
+      sun_rising_template:
+        friendly_name: "Sun Rising Template"
+        value_template: "{{ as_timestamp(states.sun.sun.attributes.next_rising) | timestamp_custom ('%H:%M') }}"
+        
+  - platform: template
+    sensors:
+      sun_setting_template:
+        friendly_name: "Sun Setting Template"
+        value_template: "{{ as_timestamp(states.sun.sun.attributes.next_setting) | timestamp_custom ('%H:%M') }}"
+        
+        
+  - platform: template
+    sensors:
+      ofis_hareket_saat:
+        friendly_name: Ofis Hareket Saati
+        value_template: "{{as_timestamp(states.binary_sensor.aqara_motion_sensor_motion.last_changed) | timestamp_custom('%H:%M')}}"
+
+  - platform: template
+    sensors:
+      sonoff_hareket_saat:
+        friendly_name: Sonoff Hareket Saati
+        value_template: "{{as_timestamp(states.binary_sensor.sonoff_hareket_sensoru.last_changed) | timestamp_custom('%H:%M')}}"
+
+  - platform: template
+    sensors:
+      tuya_kapi_hareket_saat:
+        friendly_name: Tuya Kapı Son Saati
+        value_template: "{{as_timestamp(states.binary_sensor.tuya_kapi_sensoru.last_changed) | timestamp_custom('%H:%M')}}"
+
+  - platform: template
+    sensors:
+      aqara_kapi_hareket_saat:
+        friendly_name: Aqara Kapı Son Saati
+        value_template: "{{as_timestamp(states.binary_sensor.aqara_kapi_sensor.last_changed) | timestamp_custom('%H:%M')}}"
+
+  - platform: template
+    sensors:
+      sonoff_kapi_hareket_saat:
+        friendly_name: Sonoff Kapı Son Saati
+        value_template: "{{as_timestamp(states.binary_sensor.sonoff_kapi_sensoru.last_changed) | timestamp_custom('%H:%M')}}"
