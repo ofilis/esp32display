@@ -1,0 +1,1223 @@
+substitutions:
+  devicename: ESP32Display
+  gpio_spi_clk_pin: GPIO25
+  gpio_spi_mosi_pin: GPIO26
+  gpio_cs_pin: GPIO32
+  gpio_busy_pin: GPIO13
+  gpio_reset_pin: GPIO14
+  gpio_dc_pin: GPIO27
+  
+esphome:
+  name: esp32display
+  platform: ESP32
+  board: esp32dev
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+  password: !secret esp32display_ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: true
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esp32Display Fallback Hotspot"
+    password: !secret esp32display_ap_password
+
+captive_portal:
+
+spi:
+  clk_pin: $gpio_spi_clk_pin
+  mosi_pin: $gpio_spi_mosi_pin
+  id: epaper_display
+  
+
+
+#########################-----TIME-----#########################
+
+time:
+  - platform: homeassistant
+    timezone: Europe/Moscow
+    id: current_time
+    on_time_sync:
+      - component.update: uptime_timestamp
+
+#########################-----SWITCHES-----#########################
+
+switch:
+  - platform: restart
+    name: "$devicename Restart"
+    id: restartesp
+
+  - platform: gpio
+    id: statusLED
+    name: "$devicename Status LED"
+    pin:
+      number: GPIO2
+      mode: OUTPUT
+    restore_mode: ALWAYS_OFF
+
+#########################-----SENSORS-----#########################
+
+sensor:
+
+  - platform: homeassistant
+    id: airPERCENT
+    entity_id: sensor.oda_parfumu_yuzdesi_office
+    accuracy_decimals: 0
+    unit_of_measurement: "%"
+    internal: true
+    
+  - platform: homeassistant
+    id: printerPERCENT
+    entity_id: sensor.samsung_m2070_yazici_toner_kontrol
+    accuracy_decimals: 0
+    unit_of_measurement: "%"
+    internal: true
+    
+  - platform: homeassistant
+    name: "Outside Pressure"
+    entity_id: sensor.openweathermap_pressure
+    unit_of_measurement: "hPa"
+    accuracy_decimals: 0
+    id: outPRESSURE
+    internal: true
+    
+  - platform: homeassistant
+    name: "Outside Precipitation"
+    entity_id: sensor.openweathermap_forecast_precipitation
+    unit_of_measurement: "mm"
+    accuracy_decimals: 0
+    id: precipitation
+    internal: true
+    
+  - platform: homeassistant
+    name: "Dış Sıcaklık Forecast Min"
+    entity_id: sensor.openweathermap_forecast_temperature_low
+    unit_of_measurement: "°C"
+    accuracy_decimals: 0
+    id: outTEMPmin
+    internal: true
+    
+  - platform: homeassistant
+    name: "Dış Sıcaklık Forecast Max"
+    entity_id: sensor.openweathermap_forecast_temperature
+    unit_of_measurement: "°C"
+    accuracy_decimals: 0
+    id: outTEMPmax
+    internal: true
+    
+  - platform: homeassistant
+    name: "Dış Sıcaklık from Forecast"
+    entity_id: sensor.openweathermap_temperature
+    unit_of_measurement: "°C"
+    accuracy_decimals: 0
+    id: outTEMP
+    internal: true
+    
+  - platform: homeassistant
+    name: "Wind Speed ESP"
+    entity_id: sensor.wind_speed
+    unit_of_measurement: "km/h"
+    accuracy_decimals: 0
+    id: windSPEED
+    internal: true
+    
+  - platform: homeassistant
+    name: "Ofis Sıcaklık"
+    entity_id: sensor.sonoff_scaklk_sensoru
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1
+    id: officeTEMP
+    internal: true
+    
+  - platform: homeassistant
+    name: "Mutfak Sıcaklık"
+    entity_id: sensor.tuya_sicaklik_sensoru
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1
+    id: KitchenTEMP
+    internal: true
+    
+  - platform: homeassistant
+    name: "Dış Sıcaklık"
+    entity_id: sensor.dis_sicaklik
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1
+    id: zigbeeoutTEMP
+    internal: true
+    
+  - platform: homeassistant
+    name: "Ofis Nem"
+    entity_id: sensor.sonoff_sicaklik_sensoru_nem_rounded
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    id: officeHUM
+    internal: true
+    
+  - platform: homeassistant
+    name: "Mutfak Nem"
+    entity_id: sensor.tuya_sicaklik_sensoru_nem
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    id: kitchenHUM
+    internal: true
+    
+  - platform: homeassistant
+    name: "Dış Nem"
+    entity_id: sensor.dis_nem
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    id: zigbeeoutHUM
+    internal: true
+    
+  - platform: homeassistant
+    name: "Power Consumption"
+    entity_id: sensor.lumi_lumi_plug_analog_input
+    unit_of_measurement: "W"
+    accuracy_decimals: 0
+    id: totalPOWER
+    internal: true
+    
+  - platform: uptime
+    name: "$devicename Uptime Sec"
+    id: uptime_sec
+    internal: true
+
+  - platform: wifi_signal
+    name: "$devicename WiFi Signal"
+    id: wifi_level
+    update_interval: 120s
+
+  - platform: template
+    id: uptime_timestamp
+    name: "$devicename Uptime"
+    device_class: "timestamp"
+    accuracy_decimals: 0
+    update_interval: never
+    lambda: |-
+      static float timestamp = (
+        id(current_time).utcnow().timestamp - id(uptime_sec).state
+      );
+      return timestamp;
+      
+  - platform: homeassistant
+    name: "Download Speed"
+    entity_id: sensor.speedtest_download
+    unit_of_measurement: "Mbit/s"
+    accuracy_decimals: 0
+    id: download
+    internal: true
+    
+  - platform: homeassistant
+    name: "Upload Speed"
+    entity_id: sensor.speedtest_upload
+    unit_of_measurement: "Mbit/s"
+    accuracy_decimals: 0
+    id: upload
+    internal: true
+    
+##FORECAST################################
+################## D1 ####################
+  - platform: homeassistant
+    name: "DAY-1 TEMP"
+    entity_id: sensor.day_1_temp
+    unit_of_measurement: "°C"
+    accuracy_decimals: 0
+    id: d1TEMP
+    internal: true
+    
+  - platform: homeassistant
+    name: "DAY-1 TEMPLOW"
+    entity_id: sensor.day_1_templow
+    unit_of_measurement: "°C"
+    accuracy_decimals: 0
+    id: d1TEMPLOW
+    internal: true
+    
+  - platform: homeassistant
+    name: "DAY-1 PRECIPITATION"
+    entity_id: sensor.day_1_precipitation
+    unit_of_measurement: "mm"
+    accuracy_decimals: 0
+    id: d1PRECIPITATION
+    internal: true
+    
+  - platform: homeassistant
+    name: "DAY-1 WINDSPEED"
+    entity_id: sensor.day_1_wind_speed
+    unit_of_measurement: "km/s"
+    accuracy_decimals: 0
+    id: d1WINDSPEED
+    internal: true
+
+################## D2 ####################
+  - platform: homeassistant
+    name: "DAY-2 TEMP"
+    entity_id: sensor.day_2_temp
+    unit_of_measurement: "°C"
+    accuracy_decimals: 0
+    id: d2TEMP
+    internal: true
+    
+  - platform: homeassistant
+    name: "DAY-2 TEMPLOW"
+    entity_id: sensor.day_2_templow
+    unit_of_measurement: "°C"
+    accuracy_decimals: 0
+    id: d2TEMPLOW
+    internal: true
+    
+  - platform: homeassistant
+    name: "DAY-2 PRECIPITATION"
+    entity_id: sensor.day_2_precipitation
+    unit_of_measurement: "mm"
+    accuracy_decimals: 0
+    id: d2PRECIPITATION
+    internal: true
+    
+  - platform: homeassistant
+    name: "DAY-2 WINDSPEED"
+    entity_id: sensor.day_2_wind_speed
+    unit_of_measurement: "km/s"
+    accuracy_decimals: 0
+    id: d2WINDSPEED
+    internal: true
+################## D3 ####################
+  - platform: homeassistant
+    name: "DAY-3 TEMP"
+    entity_id: sensor.day_3_temp
+    unit_of_measurement: "°C"
+    accuracy_decimals: 0
+    id: d3TEMP
+    internal: true
+    
+  - platform: homeassistant
+    name: "DAY-3 TEMPLOW"
+    entity_id: sensor.day_3_templow
+    unit_of_measurement: "°C"
+    accuracy_decimals: 0
+    id: d3TEMPLOW
+    internal: true
+
+  - platform: homeassistant
+    name: "DAY-3 PRECIPITATION"
+    entity_id: sensor.day_3_precipitation
+    unit_of_measurement: "mm"
+    accuracy_decimals: 0
+    id: d3PRECIPITATION
+    internal: true
+    
+  - platform: homeassistant
+    name: "DAY-3 WINDSPEED"
+    entity_id: sensor.day_3_wind_speed
+    unit_of_measurement: "km/s"
+    accuracy_decimals: 0
+    id: d3WINDSPEED
+    internal: true
+###########################################
+###########################################
+      
+#########################-----TEXT SENSORS-----#########################
+
+text_sensor:
+  - platform: version
+    name: "$devicename Version"
+    hide_timestamp: true
+    
+  - platform: wifi_info
+    ip_address:
+      name: "$devicename IPv4"
+      icon: "mdi:server-network"
+    ssid:
+      name: "$devicename Connected SSID"
+      icon: "mdi:wifi"
+      
+  - platform: homeassistant
+    name: forecast
+    id: weather_icon
+    entity_id: weather.openweathermap
+    internal: true
+    
+  - platform: homeassistant
+    name: "Sun Rising ESP"
+    entity_id: sensor.sun_rising_template
+    id: sun_rising
+    internal: true
+    
+  - platform: homeassistant
+    name: "Sun Setting ESP"
+    entity_id: sensor.sun_setting_template
+    id: sun_setting
+    internal: true
+    
+  - platform: homeassistant
+    name: "Moon Phases"
+    entity_id: sensor.moon
+    id: moonicon
+    internal: true
+
+  - platform: homeassistant
+    name: "Name of Day"
+    entity_id: sensor.turkishdayname
+    id: dayNAME
+    internal: true
+    
+  - platform: homeassistant
+    name: "Turkish Full Date"
+    entity_id: sensor.fulldate
+    id: fullDATE
+    internal: true
+    
+  - platform: homeassistant
+    name: "DAY-1 NAME"
+    entity_id: sensor.day_1_name
+    id: d1NAME
+    internal: true
+    
+  - platform: homeassistant
+    name: "DAY-1 FORECAST"
+    entity_id: sensor.day_1_forecast
+    id: d1FORECAST
+    internal: true
+
+  - platform: homeassistant
+    name: "DAY-2 NAME"
+    entity_id: sensor.day_2_name
+    id: d2NAME
+    internal: true
+    
+  - platform: homeassistant
+    name: "DAY-2 FORECAST"
+    entity_id: sensor.day_2_forecast
+    id: d2FORECAST
+    internal: true
+
+  - platform: homeassistant
+    name: "DAY-3 NAME"
+    entity_id: sensor.day_3_name
+    id: d3NAME
+    internal: true
+    
+  - platform: homeassistant
+    name: "DAY-3 FORECAST"
+    entity_id: sensor.day_3_forecast
+    id: d3FORECAST
+    internal: true
+
+  - platform: homeassistant
+    name: "Ofis Motion ESP"
+    entity_id: binary_sensor.sonoff_hareket_sensoru
+    id: officeMOTION 
+    internal: true
+
+  - platform: homeassistant
+    name: "Ofis Motion Time ESP"
+    entity_id: sensor.sonoff_hareket_saat
+    id: officeMOTIONtime
+    internal: true
+
+  - platform: homeassistant
+    name: "Office Motion ESP"
+    entity_id: binary_sensor.aqara_motion_sensor_motion
+    id: kitchenMOTION
+    internal: true
+    
+  - platform: homeassistant
+    name: "Kitchen Motion Time ESP"
+    entity_id: sensor.ofis_hareket_saat
+    id: kitchenMOTIONtime
+    internal: true
+    
+  - platform: homeassistant
+    name: "Office Door ESP"
+    entity_id: binary_sensor.aqara_kapi_sensor
+    id: officeDOOR 
+    internal: true
+    
+  - platform: homeassistant
+    name: "Office Door Time ESP"
+    entity_id: sensor.aqara_kapi_hareket_saat
+    id: officeDOORtime
+    internal: true
+    
+  - platform: homeassistant
+    name: "Kitchen window ESP"
+    entity_id: binary_sensor.tuya_kapi_sensoru
+    id: kitchenWINDOW
+    internal: true
+    
+  - platform: homeassistant
+    name: "Kitchen window Time ESP"
+    entity_id: sensor.tuya_kapi_hareket_saat
+    id: kitchenWINDOWtime
+    internal: true
+    
+  - platform: homeassistant
+    name: "Dining Window ESP"
+    entity_id: binary_sensor.sonoff_kapi_sensoru
+    id: diningWINDOW
+    internal: true
+    
+  - platform: homeassistant
+    name: "Dining Window Time ESP"
+    entity_id: sensor.sonoff_kapi_hareket_saat
+    id: diningWINDOWtime
+    internal: true
+    
+  - platform: homeassistant
+    name: "Dining Window Time ESP"
+    entity_id: sensor.esp32display_ipv4
+    id: ipADRESS
+    internal: true
+      
+#########################-----DISPLAY-----#########################      
+      
+display:
+  - platform: waveshare_epaper
+    id: epaper
+    cs_pin: $gpio_cs_pin
+    busy_pin: $gpio_busy_pin
+    reset_pin: $gpio_reset_pin
+    dc_pin: $gpio_dc_pin
+    model: 4.20in # 300x400
+    update_interval: 60s
+    lambda: |-
+   
+      //horizontal lines
+      
+      it.line(1, 225, 400, 225);
+      it.line(50, 173, 130, 173);
+      it.line(185, 173, 263, 173);
+      it.line(320, 173, 400, 173);
+      it.line(1, 280, 400, 280);
+      
+      //vertical lines
+      
+      it.line(0, 225, 0, 280);
+      it.line(80, 225, 80, 280);
+      it.line(160, 225, 160, 280);
+      it.line(240, 225, 240, 280);
+      it.line(320, 225, 320, 280);
+      it.line(399, 225, 399, 280);    
+    
+      //time and date
+      
+      it.strftime(200, 65, id(clock_font), TextAlign::BOTTOM_CENTER, "%H:%M", id(current_time).now());
+      it.printf(200, 75, id(bold_20), TextAlign::BOTTOM_CENTER, "%s", id(fullDATE).state.c_str());
+    
+      //dayname-sunrise-sunset
+      
+      it.printf(90, 28, id(bold_16), TextAlign::BOTTOM_CENTER, "%s", id(dayNAME).state.c_str());
+      it.printf(388, 40, id(sun_states), TextAlign::BOTTOM_CENTER, "\U000F00DE");
+      it.printf(375, 40, id(medium_20), TextAlign::BOTTOM_RIGHT, "%s", id(sun_rising).state.c_str());
+      it.printf(388, 70, id(sun_states), TextAlign::BOTTOM_CENTER, "\U000F00DD");
+      it.printf(375, 70, id(medium_20), TextAlign::BOTTOM_RIGHT, "%s", id(sun_setting).state.c_str());
+
+      //moon phasses
+      
+      if (id(moonicon).state == "new_moon") {
+      it.printf(90, 75, id(moonphasesfont), TextAlign::BOTTOM_CENTER, "\U000F0F64");}
+      if (id(moonicon).state == "waxing_crescent") {
+      it.printf(90, 75, id(moonphasesfont), TextAlign::BOTTOM_CENTER, "\U000F0F67");}
+      if (id(moonicon).state == "first_quarter") {
+      it.printf(90, 75, id(moonphasesfont), TextAlign::BOTTOM_CENTER, "\U000F0F61");}
+      if (id(moonicon).state == "waxing_gibbous") {
+      it.printf(90, 75, id(moonphasesfont), TextAlign::BOTTOM_CENTER, "\U000F0F68");}
+      if (id(moonicon).state == "full_moon") {
+      it.printf(90, 75, id(moonphasesfont), TextAlign::BOTTOM_CENTER, "\U000F0F62");}
+      if (id(moonicon).state == "waning_gibbous") {
+      it.printf(90, 75, id(moonphasesfont), TextAlign::BOTTOM_CENTER, "\U000F0F66");}
+      if (id(moonicon).state == "last_quarter") {
+      it.printf(90, 75, id(moonphasesfont), TextAlign::BOTTOM_CENTER, "\U000F0F63");}
+      if (id(moonicon).state == "waning_crescent") {
+      it.printf(90, 75, id(moonphasesfont), TextAlign::BOTTOM_CENTER, "\U000F0F65");}
+
+
+      //printer and air freshener percents
+      
+      it.printf(10, 40, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F1786");
+      if (id(printerPERCENT).has_state()) {
+      it.printf(23, 40, id(medium_20), TextAlign::BOTTOM_LEFT , "%2.0f", id(printerPERCENT).state);}
+      it.print(45, 25, id(medium_12), TextAlign::CENTER_LEFT, "%"); 
+      it.printf(10, 70, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F0665");
+      if (id(airPERCENT).has_state()) {
+      it.printf(23, 70, id(medium_20), TextAlign::BOTTOM_LEFT , "%2.0f", id(airPERCENT).state);}
+      it.print(45, 55, id(medium_12), TextAlign::CENTER_LEFT, "%"); 
+
+
+      //office temperatures
+      ///////////office
+      it.printf(10, 100, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F0F55");
+      it.printf(130, 100, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F058E");    
+      if (id(officeTEMP).has_state()) {
+      it.printf(62, 100, id(medium_20), TextAlign::BOTTOM_RIGHT , "%.1f", id(officeTEMP).state);}
+      it.print(62, 85, id(medium_12), TextAlign::CENTER_LEFT, "°C"); 
+      if (id(officeHUM).has_state()) {
+      it.printf(100, 100, id(medium_20), TextAlign::BOTTOM_CENTER , "%2.0f", id(officeHUM).state);}
+      it.print(111, 85, id(medium_12), TextAlign::CENTER_LEFT, "%"); 
+      ///////////kitchen
+      it.printf(10, 130, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F181D");
+      it.printf(130, 130, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F058E");     
+      if (id(KitchenTEMP).has_state()) {
+      it.printf(62, 130, id(medium_20), TextAlign::BOTTOM_RIGHT , "%.1f", id(KitchenTEMP).state);}
+      it.print(62, 115, id(medium_12), TextAlign::CENTER_LEFT, "°C"); 
+      if (id(kitchenHUM).has_state()) {
+      it.printf(100, 130, id(medium_20), TextAlign::BOTTOM_CENTER , "%2.0f", id(kitchenHUM).state);}
+      it.print(111, 115, id(medium_12), TextAlign::CENTER_LEFT, "%"); 
+      ///////////outside
+      it.printf(10, 160, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F18D7");
+      it.printf(130, 160, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F058E");
+      if (id(zigbeeoutTEMP).has_state()) {
+      it.printf(62, 160, id(medium_20), TextAlign::BOTTOM_RIGHT , "%.1f", id(zigbeeoutTEMP).state);}
+      it.print(62, 145, id(medium_12), TextAlign::CENTER_LEFT, "°C"); 
+      if (id(zigbeeoutHUM).has_state()) {
+      it.printf(100, 160, id(medium_20), TextAlign::BOTTOM_CENTER , "%2.0f", id(zigbeeoutHUM).state);}
+      it.print(111, 145, id(medium_12), TextAlign::CENTER_LEFT, "%"); 
+      
+
+      
+      //main weather icon
+      
+      if (id(weather_icon).state == "clear-night") {
+      it.printf(200, 170, id(conditions), TextAlign::BOTTOM_CENTER, "\U000F0594");}
+      if (id(weather_icon).state == "cloudy") {
+      it.printf(200, 170, id(conditions), TextAlign::BOTTOM_CENTER, "\U000F0590");}
+      if (id(weather_icon).state == "partlycloudy") {
+      it.printf(200, 170, id(conditions), TextAlign::BOTTOM_CENTER, "\U000F0595");}
+      if (id(weather_icon).state == "fog") {
+      it.printf(200, 170, id(conditions), TextAlign::BOTTOM_CENTER, "\U000F0591");}
+      if (id(weather_icon).state == "hail") {
+      it.printf(200, 170, id(conditions), TextAlign::BOTTOM_CENTER, "\U000F0592");}
+      if (id(weather_icon).state == "lightning") {
+      it.printf(200, 170, id(conditions), TextAlign::BOTTOM_CENTER, "\U000F0593");}
+      if (id(weather_icon).state == "lightning-rainy") {
+      it.printf(200, 170, id(conditions), TextAlign::BOTTOM_CENTER, "\U000F067E");}
+      if (id(weather_icon).state == "pouring") {
+      it.printf(200, 170, id(conditions), TextAlign::BOTTOM_CENTER, "\U000F0596");}
+      if (id(weather_icon).state == "rainy") {
+      it.printf(200, 170, id(conditions), TextAlign::BOTTOM_CENTER, "\U000F0597");}
+      if (id(weather_icon).state == "snowy") {
+      it.printf(200, 170, id(conditions), TextAlign::BOTTOM_CENTER, "\U000F0F36");}
+      if (id(weather_icon).state == "snowy-rainy") {
+      it.printf(200, 170, id(conditions), TextAlign::BOTTOM_CENTER, "\U000F067F");}
+      if (id(weather_icon).state == "sunny") {
+      it.printf(200, 170, id(conditions), TextAlign::BOTTOM_CENTER, "\U000F0599");}
+      if (id(weather_icon).state == "windy") {
+      it.printf(200, 170, id(conditions), TextAlign::BOTTOM_CENTER, "\U000F059D");}
+      if (id(weather_icon).state == "windy-variant") {
+      it.printf(200, 170, id(conditions), TextAlign::BOTTOM_CENTER, "\U000F059E");}
+      if (id(weather_icon).state == "exceptional") {
+      it.printf(200, 170, id(conditions), TextAlign::BOTTOM_CENTER, "\U000F0F38");}      
+      
+      
+      //main weather values 
+      
+      it.printf(388, 100, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F0596");
+      if (id(precipitation).has_state()) {
+      it.printf(375, 100, id(medium_20), TextAlign::BOTTOM_RIGHT , "%2.0f", id(precipitation).state);}
+      it.print(375, 105, id(medium_10), TextAlign::BOTTOM_RIGHT, "mm"); 
+      
+      it.printf(388, 130, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F059D");
+      if (id(windSPEED).has_state()) {
+      it.printf(375, 130, id(medium_20), TextAlign::BOTTOM_RIGHT , "%2.0f", id(windSPEED).state);}
+      it.print(375, 135, id(medium_10), TextAlign::BOTTOM_RIGHT, "km/h"); 
+
+      it.printf(388, 160, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F0875");
+      if (id(outPRESSURE).has_state()) {
+      it.printf(375, 160, id(medium_20), TextAlign::BOTTOM_RIGHT , "%2.0f", id(outPRESSURE).state);}
+      it.print(375, 165, id(medium_10), TextAlign::BOTTOM_RIGHT, "hPa"); 
+      
+      if (id(outTEMP).has_state()) {    
+      it.printf(280, 150, id(clock_font), TextAlign::BOTTOM_CENTER , "%2.0f", id(outTEMP).state);}
+      it.print(310, 100, id(bold_16), TextAlign::CENTER_LEFT, "°C"); 
+      if (id(outTEMPmin).has_state()) {
+      it.printf(280, 160, id(medium_20), TextAlign::BOTTOM_RIGHT , "%2.0f°", id(outTEMPmin).state);}
+      if (id(outTEMPmax).has_state()) {
+      it.printf(310, 160, id(medium_20), TextAlign::BOTTOM_RIGHT , "%2.0f°", id(outTEMPmax).state);}
+      
+      //3 day forecast/////////////////////////////////////////////////////////////////////////////////////
+      ///day names
+      it.printf(1, 180, id(bold_16), TextAlign::BOTTOM_LEFT, "%s", id(d1NAME).state.c_str());
+      it.printf(135, 180, id(bold_16), TextAlign::BOTTOM_LEFT, "%s", id(d2NAME).state.c_str());  
+      it.printf(268, 180, id(bold_16), TextAlign::BOTTOM_LEFT, "%s", id(d3NAME).state.c_str());  
+      
+      ///temp low icons
+      it.printf(50, 200, id(display_icons_20), TextAlign::BOTTOM_CENTER, "\U000F0E02");
+      it.printf(185, 200, id(display_icons_20), TextAlign::BOTTOM_CENTER, "\U000F0E02");
+      it.printf(318, 200, id(display_icons_20), TextAlign::BOTTOM_CENTER, "\U000F0E02");
+      
+      ///temp high icons
+      it.printf(95, 200, id(display_icons_20), TextAlign::BOTTOM_CENTER, "\U000F0E03");
+      it.printf(230, 200, id(display_icons_20), TextAlign::BOTTOM_CENTER, "\U000F0E03");
+      it.printf(363, 200, id(display_icons_20), TextAlign::BOTTOM_CENTER, "\U000F0E03");
+      
+      ///wind icons
+      it.printf(50, 220, id(display_icons_20), TextAlign::BOTTOM_CENTER, "\U000F059D");
+      it.printf(185, 220, id(display_icons_20), TextAlign::BOTTOM_CENTER, "\U000F059D");
+      it.printf(318, 220, id(display_icons_20), TextAlign::BOTTOM_CENTER, "\U000F059D");
+      
+      ///precipitation icons
+      it.printf(95, 220, id(display_icons_20), TextAlign::BOTTOM_CENTER, "\U000F0596");
+      it.printf(230, 220, id(display_icons_20), TextAlign::BOTTOM_CENTER, "\U000F0596");
+      it.printf(363, 220, id(display_icons_20), TextAlign::BOTTOM_CENTER, "\U000F0596");
+      
+      it.print(80, 192, id(medium_12), TextAlign::BOTTOM_LEFT, "°"); 
+      it.print(215, 192, id(medium_12), TextAlign::BOTTOM_LEFT, "°"); 
+      it.print(348, 192, id(medium_12), TextAlign::BOTTOM_LEFT, "°"); 
+      it.print(125, 192, id(medium_12), TextAlign::BOTTOM_LEFT, "°"); 
+      it.print(260, 192, id(medium_12), TextAlign::BOTTOM_LEFT, "°"); 
+      it.print(393, 192, id(medium_12), TextAlign::BOTTOM_LEFT, "°"); 
+      
+      it.print(83, 225, id(medium_8), TextAlign::BOTTOM_RIGHT, "km/h"); 
+      it.print(219, 225, id(medium_8), TextAlign::BOTTOM_RIGHT, "km/h"); 
+      it.print(351, 225, id(medium_8), TextAlign::BOTTOM_RIGHT, "km/h"); 
+      
+      it.print(125, 225, id(medium_8), TextAlign::BOTTOM_RIGHT, "mm"); 
+      it.print(260, 225, id(medium_8), TextAlign::BOTTOM_RIGHT, "mm"); 
+      it.print(393, 225, id(medium_8), TextAlign::BOTTOM_RIGHT, "mm"); 
+
+      ///temp low states  
+      if (id(d1TEMPLOW).has_state()) {
+      it.printf(80, 200, id(medium_18), TextAlign::BOTTOM_RIGHT , "%2.0f", id(d1TEMPLOW).state);}
+      if (id(d2TEMPLOW).has_state()) {
+      it.printf(215, 200, id(medium_18), TextAlign::BOTTOM_RIGHT , "%2.0f", id(d2TEMPLOW).state);}
+      if (id(d3TEMPLOW).has_state()) {
+      it.printf(348, 200, id(medium_18), TextAlign::BOTTOM_RIGHT , "%2.0f", id(d3TEMPLOW).state);}
+      
+      ///temp high states  
+      if (id(d1TEMP).has_state()) {
+      it.printf(125, 200, id(medium_18), TextAlign::BOTTOM_RIGHT , "%2.0f", id(d1TEMP).state);}
+      if (id(d2TEMP).has_state()) {
+      it.printf(260, 200, id(medium_18), TextAlign::BOTTOM_RIGHT , "%2.0f", id(d2TEMP).state);}
+      if (id(d3TEMP).has_state()) {
+      it.printf(393, 200, id(medium_18), TextAlign::BOTTOM_RIGHT , "%2.0f", id(d3TEMP).state);}
+      
+      ///wind states  
+      if (id(d1WINDSPEED).has_state()) {
+      it.printf(80, 220, id(medium_18), TextAlign::BOTTOM_RIGHT , "%2.0f", id(d1WINDSPEED).state);}
+      if (id(d2WINDSPEED).has_state()) {
+      it.printf(215, 220, id(medium_18), TextAlign::BOTTOM_RIGHT , "%2.0f", id(d2WINDSPEED).state);}
+      if (id(d3WINDSPEED).has_state()) {
+      it.printf(348, 220, id(medium_18), TextAlign::BOTTOM_RIGHT , "%2.0f", id(d3WINDSPEED).state);}
+      
+      ///precipitation states 
+      if (id(d1PRECIPITATION).has_state()) {
+      it.printf(125, 220, id(medium_18), TextAlign::BOTTOM_RIGHT , "%2.0f", id(d1PRECIPITATION).state);}
+      if (id(d2PRECIPITATION).has_state()) {
+      it.printf(260, 220, id(medium_18), TextAlign::BOTTOM_RIGHT , "%2.0f", id(d2PRECIPITATION).state);}
+      if (id(d3PRECIPITATION).has_state()) {
+      it.printf(393, 220, id(medium_18), TextAlign::BOTTOM_RIGHT , "%2.0f", id(d3PRECIPITATION).state);}
+      
+      ///1st weather icon
+      if (id(d1FORECAST).state == "clear-night") {
+      it.printf(1, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0594");}
+      if (id(d1FORECAST).state == "cloudy") {
+      it.printf(1, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0590");}
+      if (id(d1FORECAST).state == "partlycloudy") {
+      it.printf(1, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0595");}
+      if (id(d1FORECAST).state == "fog") {
+      it.printf(1, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0591");}
+      if (id(d1FORECAST).state == "hail") {
+      it.printf(1, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0592");}
+      if (id(d1FORECAST).state == "lightning") {
+      it.printf(1, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0593");}
+      if (id(d1FORECAST).state == "lightning-rainy") {
+      it.printf(1, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F067E");}
+      if (id(d1FORECAST).state == "pouring") {
+      it.printf(1, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0596");}
+      if (id(d1FORECAST).state == "rainy") {
+      it.printf(1, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0597");}
+      if (id(d1FORECAST).state == "snowy") {
+      it.printf(1, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0F36");}
+      if (id(d1FORECAST).state == "snowy-rainy") {
+      it.printf(1, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F067F");}
+      if (id(d1FORECAST).state == "sunny") {
+      it.printf(1, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0599");}
+      if (id(d1FORECAST).state == "windy") {
+      it.printf(1, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F059D");}
+      if (id(d1FORECAST).state == "windy-variant") {
+      it.printf(1, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F059E");}
+      if (id(d1FORECAST).state == "exceptional") {
+      it.printf(1, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0F38");}     
+   
+      ///2nd weather icon
+      if (id(d2FORECAST).state == "clear-night") {
+      it.printf(135, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0594");}
+      if (id(d2FORECAST).state == "cloudy") {
+      it.printf(135, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0590");}
+      if (id(d2FORECAST).state == "partlycloudy") {
+      it.printf(135, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0595");}
+      if (id(d2FORECAST).state == "fog") {
+      it.printf(135, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0591");}
+      if (id(d2FORECAST).state == "hail") {
+      it.printf(135, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0592");}
+      if (id(d2FORECAST).state == "lightning") {
+      it.printf(135, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0593");}
+      if (id(d2FORECAST).state == "lightning-rainy") {
+      it.printf(135, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F067E");}
+      if (id(d2FORECAST).state == "pouring") {
+      it.printf(135, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0596");}
+      if (id(d2FORECAST).state == "rainy") {
+      it.printf(135, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0597");}
+      if (id(d2FORECAST).state == "snowy") {
+      it.printf(135, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0F36");}
+      if (id(d2FORECAST).state == "snowy-rainy") {
+      it.printf(135, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F067F");}
+      if (id(d2FORECAST).state == "sunny") {
+      it.printf(135, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0599");}
+      if (id(d2FORECAST).state == "windy") {
+      it.printf(135, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F059D");}
+      if (id(d2FORECAST).state == "windy-variant") {
+      it.printf(135, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F059E");}
+      if (id(d2FORECAST).state == "exceptional") {
+      it.printf(135, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0F38");}
+      
+      ///3th weather icon
+      if (id(d3FORECAST).state == "clear-night") {
+      it.printf(268, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0594");}
+      if (id(d3FORECAST).state == "cloudy") {
+      it.printf(268, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0590");}
+      if (id(d3FORECAST).state == "partlycloudy") {
+      it.printf(268, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0595");}
+      if (id(d3FORECAST).state == "fog") {
+      it.printf(268, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0591");}
+      if (id(d3FORECAST).state == "hail") {
+      it.printf(268, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0592");}
+      if (id(d3FORECAST).state == "lightning") {
+      it.printf(268, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0593");}
+      if (id(d3FORECAST).state == "lightning-rainy") {
+      it.printf(268, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F067E");}
+      if (id(d3FORECAST).state == "pouring") {
+      it.printf(268, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0596");}
+      if (id(d3FORECAST).state == "rainy") {
+      it.printf(268, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0597");}
+      if (id(d3FORECAST).state == "snowy") {
+      it.printf(268, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0F36");}
+      if (id(d3FORECAST).state == "snowy-rainy") {
+      it.printf(268, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F067F");}
+      if (id(d3FORECAST).state == "sunny") {
+      it.printf(268, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0599");}
+      if (id(d3FORECAST).state == "windy") {
+      it.printf(268, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F059D");}
+      if (id(d3FORECAST).state == "windy-variant") {
+      it.printf(268, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F059E");}
+      if (id(d3FORECAST).state == "exceptional") {
+      it.printf(268, 220, id(conditions_40), TextAlign::BOTTOM_LEFT, "\U000F0F38");}
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      
+      
+      
+      ////////////////////office sensors
+      
+      //office motion
+      it.printf(47, 247, id(bold_16), TextAlign::BOTTOM_CENTER, "OFIS");      
+      it.printf(12, 255, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F070E");
+      it.printf(12, 280, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F0425");
+      if (id(officeMOTION).state == "on") {
+      it.printf(24, 265, id(medium_14), TextAlign::BOTTOM_LEFT, "Detctd");}
+      if (id(officeMOTION).state == "off") {
+      it.printf(24, 265, id(medium_14), TextAlign::BOTTOM_LEFT, "Clear");}
+      it.printf(24, 280, id(medium_14), TextAlign::BOTTOM_LEFT, "%s", id(officeMOTIONtime).state.c_str());      
+      
+      //kitchen motion
+      it.printf(127, 247, id(bold_16), TextAlign::BOTTOM_CENTER, "MTFK");     
+      it.printf(92, 255, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F070E");
+      it.printf(92, 280, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F0425");
+      if (id(kitchenMOTION).state == "on") {
+      it.printf(104, 265, id(medium_14), TextAlign::BOTTOM_LEFT, "Detctd");}
+      if (id(kitchenMOTION).state == "off") {
+      it.printf(104, 265, id(medium_14), TextAlign::BOTTOM_LEFT, "Clear");}
+      it.printf(104, 280, id(medium_14), TextAlign::BOTTOM_LEFT, "%s", id(kitchenMOTIONtime).state.c_str());
+      
+      //office door
+      it.printf(207, 247, id(bold_16), TextAlign::BOTTOM_CENTER, "OFIS");      
+      it.printf(172, 255, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F081C");
+      it.printf(172, 280, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F0425");
+      if (id(officeDOOR).state == "on") {
+      it.printf(184, 265, id(medium_14), TextAlign::BOTTOM_LEFT, "Open");}
+      if (id(kitchenMOTION).state == "off") {
+      it.printf(184, 265, id(medium_14), TextAlign::BOTTOM_LEFT, "Closed");}
+      it.printf(184, 280, id(medium_14), TextAlign::BOTTOM_LEFT, "%s", id(officeDOORtime).state.c_str());
+      
+      //dining window
+      it.printf(289, 247, id(bold_16), TextAlign::BOTTOM_CENTER, "YMEK");      
+      it.printf(252, 255, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F11DB");
+      it.printf(252, 280, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F0425");
+      if (id(diningWINDOW).state == "on") {
+      it.printf(264, 265, id(medium_14), TextAlign::BOTTOM_LEFT, "Open");}
+      if (id(diningWINDOW).state == "off") {
+      it.printf(264, 265, id(medium_14), TextAlign::BOTTOM_LEFT, "Closed");}
+      it.printf(264, 280, id(medium_14), TextAlign::BOTTOM_LEFT, "%s", id(diningWINDOWtime).state.c_str());
+      
+      //kitchen window
+      it.printf(369, 247, id(bold_16), TextAlign::BOTTOM_CENTER, "MTFK");      
+      it.printf(332, 255, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F11DB");
+      it.printf(332, 280, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F0425");
+      if (id(kitchenWINDOW).state == "on") {
+      it.printf(344, 265, id(medium_14), TextAlign::BOTTOM_LEFT, "Open");}
+      if (id(kitchenWINDOW).state == "off") {
+      it.printf(344, 265, id(medium_14), TextAlign::BOTTOM_LEFT, "Closed");}
+      it.printf(344, 280, id(medium_14), TextAlign::BOTTOM_LEFT, "%s", id(kitchenWINDOWtime).state.c_str());
+            
+      
+      ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      
+      //power
+      
+      it.print(0, 293, id(display_icons_18), TextAlign::CENTER_LEFT, "\U000F140B"); 
+      if (id(totalPOWER).has_state()) {
+      it.printf(18, 293, id(medium_16), TextAlign::CENTER_LEFT , "%2.0fw", id(totalPOWER).state);}
+      
+      //ip adress
+      
+      it.printf(200, 303, id(medium_14), TextAlign::BOTTOM_CENTER, "%s", id(ipADRESS).state.c_str());
+      
+      //download speed
+      
+      it.print(344, 295, id(medium_10), TextAlign::CENTER_LEFT, "Mbit/s"); 
+      if (id(download).has_state()) {
+      it.printf(342, 293, id(medium_16), TextAlign::CENTER_RIGHT , "%2.0f", id(download).state);} 
+      
+      //wi-fi level
+      
+      if (id(wifi_level).state >= -50) {
+      it.printf(400, 293, id(display_icons_20), TextAlign::CENTER_RIGHT, "\U000F08BE");}
+      if (id(wifi_level).state >= -60) {
+      it.printf(400, 293, id(display_icons_20), TextAlign::CENTER_RIGHT, "\U000F08BD");}
+      if (id(wifi_level).state >= -70) {
+      it.printf(400, 293, id(display_icons_20), TextAlign::CENTER_RIGHT, "\U000F08BC");}
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////      
+      
+#########################-----FONTS-----#########################       
+
+font:
+
+  - file: 'fonts/Google_Sans_Bold.ttf'
+    id: clock_font
+    size: 60
+    glyphs: 
+      ['&', '@', '!', ',', '.', '"', '%', '+', '-', '_', ':', '°', '0',
+        '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'Ç', 'D', 'E',
+        'F', 'G', 'Ğ', 'H', 'I', 'İ', 'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P', 'Q', 
+        'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'W', 'X', 'Y', 'Z', ' ', 'a', 'b', 'c', 
+        'ç', 'd', 'e', 'f', 'g', 'ğ', 'h', 'ı', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+        'ö', 'p', 'q', 'r', 's', 'ş', 't', 'u', 'ü', 'v', 'w', 'x', 'y', 'z', '/',
+        'è']   
+    
+  - file: 'fonts/materialdesignicons-webfont.ttf'
+    id: sun_states
+    size: 25
+    glyphs:
+      - "\U000F00DE" # SunRise
+      - "\U000F00DD" # SunSet
+      
+  - file: 'fonts/materialdesignicons-webfont.ttf'
+    id: display_icons
+    size: 25
+    glyphs:
+      - "\U000F0F55" # Home
+      - "\U000F181D" # Kitchen
+      - "\U000F18D7" # Outside Sensor
+      - "\U000F059D" # Wind
+      - "\U000F0875" # Pressure
+      - "\U000F0596" # Precipitation
+      - "\U000F0E0A" # Humidity
+      - "\U000F058E" # Humidity Percent
+      - "\U000F1806" # Humidity Circle 
+      - "\U000F1786" # Printer
+      - "\U000F0D44" # Air Purifier 
+      - "\U000F0DAC" # Air Horn 
+      - "\U000F0665" # Spray
+      - "\U000F0E02" # Temperature Low
+      - "\U000F0E03" # Temperature High 
+      - "\U000F08BE" # 3 Line
+      - "\U000F08BD" # 2 Line 
+      - "\U000F08BC" # 1 Line
+      - "\U000F070E" # Motion 
+      - "\U000F11DB" # Window
+      - "\U000F081C" # Door
+      - "\U000F140B" # Power
+      - "\U000F0150" # Clock
+      - "\U000F0425" # On/Off İcon
+      
+  - file: 'fonts/materialdesignicons-webfont.ttf'
+    id: display_icons_20
+    size: 20
+    glyphs:
+      - "\U000F0F55" # Home
+      - "\U000F181D" # Kitchen
+      - "\U000F18D7" # Outside Sensor
+      - "\U000F059D" # Wind
+      - "\U000F0875" # Pressure
+      - "\U000F0596" # Precipitation
+      - "\U000F0E0A" # Humidity
+      - "\U000F058E" # Humidity Percent
+      - "\U000F1806" # Humidity Circle 
+      - "\U000F1786" # Printer
+      - "\U000F0D44" # Air Purifier 
+      - "\U000F0DAC" # Air Horn 
+      - "\U000F0665" # Spray
+      - "\U000F0E02" # Temperature Low
+      - "\U000F0E03" # Temperature High 
+      - "\U000F08BE" # 3 Line
+      - "\U000F08BD" # 2 Line 
+      - "\U000F08BC" # 1 Line
+      - "\U000F070E" # Motion 
+      - "\U000F11DB" # Window
+      - "\U000F081C" # Door
+      - "\U000F140B" # Power
+      - "\U000F0150" # Clock
+      - "\U000F0425" # On/Off İcon
+
+  - file: 'fonts/materialdesignicons-webfont.ttf'
+    id: display_icons_18
+    size: 18
+    glyphs:
+      - "\U000F0F55" # Home
+      - "\U000F181D" # Kitchen
+      - "\U000F18D7" # Outside Sensor
+      - "\U000F059D" # Wind
+      - "\U000F0875" # Pressure
+      - "\U000F0596" # Precipitation
+      - "\U000F0E0A" # Humidity
+      - "\U000F058E" # Humidity Percent
+      - "\U000F1806" # Humidity Circle 
+      - "\U000F1786" # Printer
+      - "\U000F0D44" # Air Purifier 
+      - "\U000F0DAC" # Air Horn 
+      - "\U000F0665" # Spray
+      - "\U000F0E02" # Temperature Low
+      - "\U000F0E03" # Temperature High 
+      - "\U000F08BE" # 3 Line
+      - "\U000F08BD" # 2 Line 
+      - "\U000F08BC" # 1 Line
+      - "\U000F070E" # Motion 
+      - "\U000F11DB" # Window
+      - "\U000F081C" # Door
+      - "\U000F140B" # Power
+      - "\U000F0150" # Clock
+      - "\U000F0425" # On/Off İcon
+
+  - file: 'fonts/materialdesignicons-webfont.ttf'
+    id: display_icons_15
+    size: 15
+    glyphs:
+      - "\U000F0F55" # Home
+      - "\U000F181D" # Kitchen
+      - "\U000F18D7" # Outside Sensor
+      - "\U000F059D" # Wind
+      - "\U000F0875" # Pressure
+      - "\U000F0596" # Precipitation
+      - "\U000F0E0A" # Humidity
+      - "\U000F058E" # Humidity Percent
+      - "\U000F1806" # Humidity Circle 
+      - "\U000F1786" # Printer
+      - "\U000F0D44" # Air Purifier 
+      - "\U000F0DAC" # Air Horn 
+      - "\U000F0665" # Spray
+      - "\U000F0E02" # Temperature Low
+      - "\U000F0E03" # Temperature High 
+      - "\U000F08BE" # 3 Line
+      - "\U000F08BD" # 2 Line 
+      - "\U000F08BC" # 1 Line
+      - "\U000F070E" # Motion 
+      - "\U000F11DB" # Window
+      - "\U000F081C" # Door
+      - "\U000F140B" # Power
+      - "\U000F0150" # Clock 
+      - "\U000F0425" # On/Off İcon
+  
+
+  - file: 'fonts/materialdesignicons-webfont.ttf'
+    id: conditions
+    size: 100
+    glyphs:
+      - "\U000F0594" # clear-night
+      - "\U000F0590" # cloudy
+      - "\U000F0595" # partlycloudy
+      - "\U000F0591" # fog      
+      - "\U000F0592" # hail
+      - "\U000F0593" # lightning
+      - "\U000F067E" # lightning-rainy
+      - "\U000F0596" # pouring
+      - "\U000F0597" # rainy
+      - "\U000F0F36" # snowy
+      - "\U000F067F" # snowy-rainy
+      - "\U000F0599" # sunny
+      - "\U000F059D" # windy
+      - "\U000F059E" # windy-variant
+      - "\U000F0F38" # exceptional
+      
+  - file: 'fonts/materialdesignicons-webfont.ttf'
+    id: conditions_40
+    size: 40
+    glyphs:
+      - "\U000F0594" # clear-night
+      - "\U000F0590" # cloudy
+      - "\U000F0595" # partlycloudy
+      - "\U000F0591" # fog      
+      - "\U000F0592" # hail
+      - "\U000F0593" # lightning
+      - "\U000F067E" # lightning-rainy
+      - "\U000F0596" # pouring
+      - "\U000F0597" # rainy
+      - "\U000F0F36" # snowy
+      - "\U000F067F" # snowy-rainy
+      - "\U000F0599" # sunny
+      - "\U000F059D" # windy
+      - "\U000F059E" # windy-variant
+      - "\U000F0F38" # exceptional
+      
+  - file: 'fonts/materialdesignicons-webfont.ttf'
+    id: moonphasesfont
+    size: 50
+    glyphs:
+      - "\U000F0F61" # First Quarter
+      - "\U000F0F62" # Full Moon
+      - "\U000F0F63" # Last Quarter
+      - "\U000F0F64" # New Moon
+      - "\U000F0F65" # Waning Crescent
+      - "\U000F0F66" # Waning Gibbous
+      - "\U000F0F67" # Waxing Crescent
+      - "\U000F0F68" # Waxing Gibbous
+
+  - file: 'fonts/Google_Sans_Bold.ttf'
+    id: bold_14
+    size: 14
+    glyphs: 
+      ['&', '@', '!', ',', '.', '"', '%', '+', '-', '_', ':', '°', '0',
+        '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'Ç', 'D', 'E',
+        'F', 'G', 'Ğ', 'H', 'I', 'İ', 'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P', 'Q', 
+        'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'W', 'X', 'Y', 'Z', ' ', 'a', 'b', 'c', 
+        'ç', 'd', 'e', 'f', 'g', 'ğ', 'h', 'ı', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+        'ö', 'p', 'q', 'r', 's', 'ş', 't', 'u', 'ü', 'v', 'w', 'x', 'y', 'z', '/',
+        'è']   
+      
+  - file: 'fonts/Google_Sans_Bold.ttf'
+    id: bold_16
+    size: 16
+    glyphs: 
+      ['&', '@', '!', ',', '.', '"', '%', '+', '-', '_', ':', '°', '0',
+        '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'Ç', 'D', 'E',
+        'F', 'G', 'Ğ', 'H', 'I', 'İ', 'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P', 'Q', 
+        'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'W', 'X', 'Y', 'Z', ' ', 'a', 'b', 'c', 
+        'ç', 'd', 'e', 'f', 'g', 'ğ', 'h', 'ı', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+        'ö', 'p', 'q', 'r', 's', 'ş', 't', 'u', 'ü', 'v', 'w', 'x', 'y', 'z', '/',
+        'è']   
+      
+  - file: 'fonts/Google_Sans_Bold.ttf'
+    id: bold_20
+    size: 20
+    glyphs: 
+      ['&', '@', '!', ',', '.', '"', '%', '+', '-', '_', ':', '°', '0',
+        '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'Ç', 'D', 'E',
+        'F', 'G', 'Ğ', 'H', 'I', 'İ', 'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P', 'Q', 
+        'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'W', 'X', 'Y', 'Z', ' ', 'a', 'b', 'c', 
+        'ç', 'd', 'e', 'f', 'g', 'ğ', 'h', 'ı', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+        'ö', 'p', 'q', 'r', 's', 'ş', 't', 'u', 'ü', 'v', 'w', 'x', 'y', 'z', '/',
+        'è']   
+        
+  - file: 'fonts/Google_Sans_Bold.ttf'
+    id: bold_24
+    size: 24
+    glyphs: 
+      ['&', '@', '!', ',', '.', '"', '%', '+', '-', '_', ':', '°', '0',
+        '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'Ç', 'D', 'E',
+        'F', 'G', 'Ğ', 'H', 'I', 'İ', 'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P', 'Q', 
+        'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'W', 'X', 'Y', 'Z', ' ', 'a', 'b', 'c', 
+        'ç', 'd', 'e', 'f', 'g', 'ğ', 'h', 'ı', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+        'ö', 'p', 'q', 'r', 's', 'ş', 't', 'u', 'ü', 'v', 'w', 'x', 'y', 'z', '/',
+        'è']
+
+  - file: 'fonts/Google_Sans_Medium.ttf'
+    id: medium_8
+    size: 8
+    glyphs: 
+      ['&', '@', '!', ',', '.', '"', '%', '+', '-', '_', ':', '°', '0',
+        '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'Ç', 'D', 'E',
+        'F', 'G', 'Ğ', 'H', 'I', 'İ', 'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P', 'Q', 
+        'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'W', 'X', 'Y', 'Z', ' ', 'a', 'b', 'c', 
+        'ç', 'd', 'e', 'f', 'g', 'ğ', 'h', 'ı', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+        'ö', 'p', 'q', 'r', 's', 'ş', 't', 'u', 'ü', 'v', 'w', 'x', 'y', 'z', '/',
+        'è']   
+        
+  - file: 'fonts/Google_Sans_Medium.ttf'
+    id: medium_10
+    size: 10
+    glyphs: 
+      ['&', '@', '!', ',', '.', '"', '%', '+', '-', '_', ':', '°', '0',
+        '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'Ç', 'D', 'E',
+        'F', 'G', 'Ğ', 'H', 'I', 'İ', 'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P', 'Q', 
+        'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'W', 'X', 'Y', 'Z', ' ', 'a', 'b', 'c', 
+        'ç', 'd', 'e', 'f', 'g', 'ğ', 'h', 'ı', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+        'ö', 'p', 'q', 'r', 's', 'ş', 't', 'u', 'ü', 'v', 'w', 'x', 'y', 'z', '/',
+        'è']   
+        
+  - file: 'fonts/Google_Sans_Medium.ttf'
+    id: medium_12
+    size: 12
+    glyphs: 
+      ['&', '@', '!', ',', '.', '"', '%', '+', '-', '_', ':', '°', '0',
+        '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'Ç', 'D', 'E',
+        'F', 'G', 'Ğ', 'H', 'I', 'İ', 'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P', 'Q', 
+        'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'W', 'X', 'Y', 'Z', ' ', 'a', 'b', 'c', 
+        'ç', 'd', 'e', 'f', 'g', 'ğ', 'h', 'ı', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+        'ö', 'p', 'q', 'r', 's', 'ş', 't', 'u', 'ü', 'v', 'w', 'x', 'y', 'z', '/',
+        'è']    
+        
+  - file: 'fonts/Google_Sans_Medium.ttf'
+    id: medium_14
+    size: 14
+    glyphs: 
+      ['&', '@', '!', ',', '.', '"', '%', '+', '-', '_', ':', '°', '0',
+        '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'Ç', 'D', 'E',
+        'F', 'G', 'Ğ', 'H', 'I', 'İ', 'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P', 'Q', 
+        'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'W', 'X', 'Y', 'Z', ' ', 'a', 'b', 'c', 
+        'ç', 'd', 'e', 'f', 'g', 'ğ', 'h', 'ı', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+        'ö', 'p', 'q', 'r', 's', 'ş', 't', 'u', 'ü', 'v', 'w', 'x', 'y', 'z', '/',
+        'è']   
+        
+  - file: 'fonts/Google_Sans_Medium.ttf'
+    id: medium_16
+    size: 16
+    glyphs: 
+      ['&', '@', '!', ',', '.', '"', '%', '+', '-', '_', ':', '°', '0',
+        '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'Ç', 'D', 'E',
+        'F', 'G', 'Ğ', 'H', 'I', 'İ', 'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P', 'Q', 
+        'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'W', 'X', 'Y', 'Z', ' ', 'a', 'b', 'c', 
+        'ç', 'd', 'e', 'f', 'g', 'ğ', 'h', 'ı', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+        'ö', 'p', 'q', 'r', 's', 'ş', 't', 'u', 'ü', 'v', 'w', 'x', 'y', 'z', '/',
+        'è']     
+        
+  - file: 'fonts/Google_Sans_Medium.ttf'
+    id: medium_18
+    size: 18
+    glyphs: 
+      ['&', '@', '!', ',', '.', '"', '%', '+', '-', '_', ':', '°', '0',
+        '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'Ç', 'D', 'E',
+        'F', 'G', 'Ğ', 'H', 'I', 'İ', 'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P', 'Q', 
+        'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'W', 'X', 'Y', 'Z', ' ', 'a', 'b', 'c', 
+        'ç', 'd', 'e', 'f', 'g', 'ğ', 'h', 'ı', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+        'ö', 'p', 'q', 'r', 's', 'ş', 't', 'u', 'ü', 'v', 'w', 'x', 'y', 'z', '/',
+        'è']    
+        
+  - file: 'fonts/Google_Sans_Medium.ttf'
+    id: medium_20
+    size: 20
+    glyphs: 
+      ['&', '@', '!', ',', '.', '"', '%', '+', '-', '_', ':', '°', '0',
+        '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'Ç', 'D', 'E',
+        'F', 'G', 'Ğ', 'H', 'I', 'İ', 'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P', 'Q', 
+        'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'W', 'X', 'Y', 'Z', ' ', 'a', 'b', 'c', 
+        'ç', 'd', 'e', 'f', 'g', 'ğ', 'h', 'ı', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+        'ö', 'p', 'q', 'r', 's', 'ş', 't', 'u', 'ü', 'v', 'w', 'x', 'y', 'z', '/',
+        'è']
+        
