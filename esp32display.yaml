@@ -549,14 +549,16 @@ display:
 
       //printer and air freshener percents
       
-      it.printf(10, 40, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F1786");
-      if (id(printerPERCENT).has_state()) {
-      it.printf(23, 40, id(medium_20), TextAlign::BOTTOM_LEFT , "%2.0f", id(printerPERCENT).state);}
-      it.print(45, 25, id(medium_12), TextAlign::CENTER_LEFT, "%"); 
-      it.printf(10, 70, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F0665");
+      it.printf(10, 40, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F0665");
       if (id(airPERCENT).has_state()) {
-      it.printf(23, 70, id(medium_20), TextAlign::BOTTOM_LEFT , "%2.0f", id(airPERCENT).state);}
+      it.printf(23, 40, id(medium_20), TextAlign::BOTTOM_LEFT , "%2.0f", id(airPERCENT).state);}
+      it.print(45, 25, id(medium_12), TextAlign::CENTER_LEFT, "%"); 
+      
+      it.printf(10, 70, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F1786");
+      if (id(printerPERCENT).has_state()) {
+      it.printf(23, 70, id(medium_20), TextAlign::BOTTOM_LEFT , "%2.0f", id(printerPERCENT).state);}
       it.print(45, 55, id(medium_12), TextAlign::CENTER_LEFT, "%"); 
+
 
 
       //office temperatures
@@ -900,6 +902,8 @@ display:
       it.printf(400, 293, id(display_icons_20), TextAlign::CENTER_RIGHT, "\U000F08BD");}
       if (id(wifi_level).state >= -70) {
       it.printf(400, 293, id(display_icons_20), TextAlign::CENTER_RIGHT, "\U000F08BC");}
+      if (id(wifi_level).state >= -90) {
+      it.printf(400, 293, id(display_icons_20), TextAlign::CENTER_RIGHT, "\U000F08BF");}
       ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////      
       
 #########################-----FONTS-----#########################       
@@ -946,7 +950,8 @@ font:
       - "\U000F0E03" # Temperature High 
       - "\U000F08BE" # 3 Line
       - "\U000F08BD" # 2 Line 
-      - "\U000F08BC" # 1 Line
+      - "\U000F08BC" # 1 Line F08BF
+      - "\U000F08BF" # 0 Line 
       - "\U000F070E" # Motion 
       - "\U000F11DB" # Window
       - "\U000F081C" # Door
@@ -976,6 +981,7 @@ font:
       - "\U000F08BE" # 3 Line
       - "\U000F08BD" # 2 Line 
       - "\U000F08BC" # 1 Line
+      - "\U000F08BF" # 0 Line 
       - "\U000F070E" # Motion 
       - "\U000F11DB" # Window
       - "\U000F081C" # Door
@@ -1005,6 +1011,7 @@ font:
       - "\U000F08BE" # 3 Line
       - "\U000F08BD" # 2 Line 
       - "\U000F08BC" # 1 Line
+      - "\U000F08BF" # 0 Line 
       - "\U000F070E" # Motion 
       - "\U000F11DB" # Window
       - "\U000F081C" # Door
@@ -1034,6 +1041,7 @@ font:
       - "\U000F08BE" # 3 Line
       - "\U000F08BD" # 2 Line 
       - "\U000F08BC" # 1 Line
+      - "\U000F08BF" # 0 Line 
       - "\U000F070E" # Motion 
       - "\U000F11DB" # Window
       - "\U000F081C" # Door
@@ -1226,4 +1234,3 @@ font:
         'ç', 'd', 'e', 'f', 'g', 'ğ', 'h', 'ı', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
         'ö', 'p', 'q', 'r', 's', 'ş', 't', 'u', 'ü', 'v', 'w', 'x', 'y', 'z', '/',
         'è']
-        
