@@ -20,8 +20,8 @@ sensor:
       day_1_name:
         value_template: >-
             {% set wk = now().strftime('%w') | int %}
-            {% set dayz = ["Pzts", "Salı","Çarşb","Perşb","Cuma","Ctesi","Pazar"] %}
-            {{dayz[wk + 0]}}     
+            {% set dayz = ["Pzrtsi", "Salı","Çarşb","Perşb","Cuma","Ctesi","Pazar"] %}
+            {{dayz[wk + 0]}}
   - platform: template
     sensors:
       day_1_forecast:
@@ -50,8 +50,13 @@ sensor:
       day_2_name:
         value_template: >-
             {% set wk = now().strftime('%w') | int %}
-            {% set dayz = ["Pzts", "Salı","Çarşb","Perşb","Cuma","Ctesi","Pazar"] %}
-            {{dayz[wk + 1]}}
+            {% set dayz = ["Pzrtsi", "Salı","Çarşb","Perşb","Cuma","Ctesi","Pazar"] %}
+        
+            {% if wk >= 5 %}
+              {{dayz[wk - 6]}}
+            {% else %}
+              {{dayz[wk + 1]}}
+            {% endif %}
   - platform: template
     sensors:
       day_2_forecast:
@@ -79,8 +84,13 @@ sensor:
       day_3_name:
         value_template: >-
             {% set wk = now().strftime('%w') | int %}
-            {% set dayz = ["Pzts", "Salı","Çarşb","Perşb","Cuma","Ctesi","Pazar"] %}
-            {{dayz[wk + 2]}}
+            {% set dayz = ["Pzrtsi", "Salı","Çarşb","Perşb","Cuma","Ctesi","Pazar"] %}
+        
+            {% if wk >= 5 %}
+              {{dayz[wk - 5]}}
+            {% else %}
+              {{dayz[wk + 2]}}
+            {% endif %}
   - platform: template
     sensors:
       day_3_forecast:
