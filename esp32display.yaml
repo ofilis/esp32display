@@ -851,7 +851,7 @@ display:
       it.printf(172, 280, id(display_icons), TextAlign::BOTTOM_CENTER, "\U000F0425");
       if (id(officeDOOR).state == "on") {
       it.printf(184, 265, id(medium_14), TextAlign::BOTTOM_LEFT, "Open");}
-      if (id(kitchenMOTION).state == "off") {
+      if (id(officeDOOR).state == "off") {
       it.printf(184, 265, id(medium_14), TextAlign::BOTTOM_LEFT, "Closed");}
       it.printf(184, 280, id(medium_14), TextAlign::BOTTOM_LEFT, "%s", id(officeDOORtime).state.c_str());
       
@@ -1234,3 +1234,4 @@ font:
         'ç', 'd', 'e', 'f', 'g', 'ğ', 'h', 'ı', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
         'ö', 'p', 'q', 'r', 's', 'ş', 't', 'u', 'ü', 'v', 'w', 'x', 'y', 'z', '/',
         'è']
+        
