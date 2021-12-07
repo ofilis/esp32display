@@ -163,3 +163,39 @@ sensor:
       sonoff_kapi_hareket_saat:
         friendly_name: Sonoff Kapı Son Saati
         value_template: "{{as_timestamp(states.binary_sensor.sonoff_kapi_sensoru.last_changed) | timestamp_custom('%H:%M')}}"
+        
+  - platform: template
+    sensors:
+      esp32display_uptime_template:
+        friendly_name: "ESP32Display Uptime Template"
+        value_template: >-
+          {% set up_time =  as_timestamp(now()) - as_timestamp(states('sensor.esp32display_uptime')) %}
+  
+          {% if up_time == 0 %}
+            Just restarted...
+          {% else %}
+            {% set minutes = (up_time // 60) | int %}
+            {% set hours = (minutes // 60) %}
+            {% set days = (hours // 24) %}
+            {% set weeks = (days // 7) %}
+
+            {% set minutes = (minutes % 60) %}
+            {% set hours =  (hours % 24) %}
+            {% set days = (days % 7) %}
+
+            {% macro phrase(value, name) %}
+                      {%- set value = value %}
+                      {%- set end = 's' if value > 1 else '' %}
+                      {{- '{} {}{}'.format(value, name, end) if value | int > 0 else '' }}
+            {%- endmacro %}
+
+            {% set text = [ phrase(hours, 'hr'), phrase(minutes, 'min') ] | select('!=','') | list | join(', ') %}
+            {% set last_comma = text.rfind(',') %}
+            {% if last_comma != -1 %}
+              {% set text = text[:last_comma] + ' and' + text[last_comma + 1:] %}
+            {% endif %}
+
+          {{ text }}
+
+          {% endif %}
+      
