@@ -345,7 +345,14 @@ text_sensor:
     ssid:
       name: "$devicename Connected SSID"
       icon: "mdi:wifi"
+
       
+  - platform: homeassistant
+    name: forecast
+    id: esp32displayuptimetemplate
+    entity_id: sensor.esp32display_uptime_template
+    internal: true
+    
   - platform: homeassistant
     name: forecast
     id: weather_icon
@@ -886,7 +893,8 @@ display:
       
       //ip adress
       
-      it.printf(200, 303, id(medium_14), TextAlign::BOTTOM_CENTER, "%s", id(ipADRESS).state.c_str());
+
+      it.printf(200, 301, id(medium_12), TextAlign::BOTTOM_CENTER, "Connected %s ago", id(esp32displayuptimetemplate).state.c_str());
       
       //download speed
       
