@@ -27,7 +27,7 @@ PHOTOS FROM PROJECT:
 ![Screenshot](https://github.com/ofilis/esp32display/blob/main/images/IMG_0304.JPG)
 ![Screenshot](https://github.com/ofilis/esp32display/blob/main/images/IMG_0305.JPG)
 ![Screenshot](https://github.com/ofilis/esp32display/blob/main/images/IMG_0309.JPG)
-                    FOR COMPARE:
+FOR THE SIZE COMPARE:
 ![Screenshot](https://github.com/ofilis/esp32display/blob/main/images/IMG_0310.JPG)
 ![Screenshot](https://github.com/ofilis/esp32display/blob/main/images/IMG_0314.JPG)
 ![Screenshot](https://github.com/ofilis/esp32display/blob/main/images/IMG_0316.JPG)
