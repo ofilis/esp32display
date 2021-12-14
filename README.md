@@ -17,5 +17,18 @@ What i have used:
 
 Added all codes to this repository.
 
-https://github.com/ofilis/esp32display/blob/main/images/IMG_0310.JPG
+----------------------------------------------------------------------------------------------------------------
+
+PHOTOS FROM PROJECT:
+
+![Screenshot](https://github.com/ofilis/esp32display/blob/main/images/IMG_0275.JPG)
+![Screenshot](https://github.com/ofilis/esp32display/blob/main/images/IMG_0276.JPG)
+![Screenshot](https://github.com/ofilis/esp32display/blob/main/images/IMG_0280.JPG)
+![Screenshot](https://github.com/ofilis/esp32display/blob/main/images/IMG_0304.JPG)
+![Screenshot](https://github.com/ofilis/esp32display/blob/main/images/IMG_0305.JPG)
+![Screenshot](https://github.com/ofilis/esp32display/blob/main/images/IMG_0309.JPG)
 ![Screenshot](https://github.com/ofilis/esp32display/blob/main/images/IMG_0310.JPG)
+![Screenshot](https://github.com/ofilis/esp32display/blob/main/images/IMG_0314.JPG)
+![Screenshot](https://github.com/ofilis/esp32display/blob/main/images/IMG_0316.JPG)
+![Screenshot](https://github.com/ofilis/esp32display/blob/main/images/IMG_0317.JPG)
+
