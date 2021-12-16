@@ -891,8 +891,7 @@ display:
       if (id(totalPOWER).has_state()) {
       it.printf(18, 293, id(medium_16), TextAlign::CENTER_LEFT , "%2.0fw", id(totalPOWER).state);}
       
-      //ip adress
-      
+      //esp32 uptime
 
       it.printf(200, 301, id(medium_12), TextAlign::BOTTOM_CENTER, "Connected %s ago", id(esp32displayuptimetemplate).state.c_str());
       
